@@ -1,0 +1,13 @@
+name = "ReactionEngine"
+uuid = "036d97a2-b42c-4fce-a1cd-e09cd37fda29"
+authors = ["Vinod Janardhanan"]
+version = "0.1.0"
+
+[compat]
+julia = "1.7.1"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
