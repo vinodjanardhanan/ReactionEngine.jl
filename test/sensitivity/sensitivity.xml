@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<sensitivity>
+	<gsa_species>CH4 H2O H2 CO CO2 O2 N2</gsa_species>
+	<gsa_lb>5</gsa_lb>
+	<gsa_ub>10</gsa_ub>
+	<gsa_N>10</gsa_N>
+	<gsa_model>cstr.xml</gsa_model>
+	<p_smech>1:6=7:12,13=14,16:20</p_smech>
+	<!--p_smech>1:10</p_smech-->
+	<!--p_smech>:</p_smech-->
+</sensitivity>
