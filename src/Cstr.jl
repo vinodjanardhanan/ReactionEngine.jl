@@ -96,11 +96,11 @@ function cstr(input_file::AbstractString, lib_dir::AbstractString, sens= false)
     end
     cb = FunctionCallingCallback(save_data)
     soln = solve(prob,alg_hints=[:stiff] , reltol=1e-6, abstol = 1e-8, save_everystep=false, callback=cb)
-    println("Solver Integration: ", soln.retcode, "\t")
+    # println("Solver Integration: ", soln.retcode, "\t", typeof(soln.retcode))
     #close the files
     close(g_stream)
-    close(s_stream)
-    
+    close(s_stream)    
+    return soln.retcode
 end
 
 function residual!(du,u,p,t)

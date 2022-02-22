@@ -1,3 +1,8 @@
 [deps]
+DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+LightXML = "9c8b4983-aa76-5018-a973-4c85ecc9e179"
 ReactionEngine = "036d97a2-b42c-4fce-a1cd-e09cd37fda29"
+Roots = "f2b01f46-fcfa-551c-844a-d8ac1e96c665"
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+Sundials = "c3572dad-4567-51f8-b174-8c6c989267f4"

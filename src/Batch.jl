@@ -65,9 +65,11 @@ function batch(input_file::AbstractString, lib_dir::AbstractString, sens=false)
     end
     cb = FunctionCallingCallback(save_data)
     sol = solve(prob,alg_hints=[:stiff] , reltol=1e-6, abstol = 1e-8, save_everystep=false, callback=cb)
-    println("Solver Integration: ", sol.retcode, "\t")
+    
     close(g_stream)
     close(s_stream)    
+
+    return sol.retcode
 end
 
 

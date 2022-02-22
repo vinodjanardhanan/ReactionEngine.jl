@@ -1,5 +1,5 @@
-using Pkg
-pkg"activate .."
+# using Pkg
+# pkg"activate .."
 using ReactionEngine
 using Documenter
 include("../src/Utils.jl")

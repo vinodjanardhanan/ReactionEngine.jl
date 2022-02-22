@@ -84,6 +84,8 @@ function equil(input_file::AbstractString, lib_dir::AbstractString)
     for k in eachindex(gasphase_in)
         @printf("%10s \t %.4e \t %.4e\n", gasphase_in[k], moles_all[k],molefracs[k])        
     end
+
+    return Symbol("Success")
 end
 
 """

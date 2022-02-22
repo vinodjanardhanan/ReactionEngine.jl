@@ -61,6 +61,8 @@ function run(input_file::AbstractString, lib_dir::AbstractString)
     @printf("Enthalpy (J/mol): %e \n", hmix)
     @printf("Specific Heat (J/mol-K): %e \n", cpmix)
     @printf("Gibbs free energy (J/mol): %e \n ", gmix)
+
+    return Symbol("Success")
 end
 
 end

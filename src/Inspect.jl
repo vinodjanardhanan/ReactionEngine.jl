@@ -70,6 +70,7 @@ function  run(input_file::AbstractString, lib_dir::AbstractString)
     println("\nSum of fluxes (mol/m2-s): ", sum(state.s_rate[ng+1:lastindex(state.s_rate)]))
     println("Sum of coverages: ", sum(state.covg))
     
+    return Symbol("Success")
    
 end
 

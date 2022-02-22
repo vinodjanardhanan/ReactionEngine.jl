@@ -480,7 +480,8 @@ function run(file_path::AbstractString, lib_dir::AbstractString)
     #Evaluate thermal conductivity
     λ = thermal_coductivity(sp_tr_data,T,p,thermo_all,mole_fracs)
     @printf("\nThermal conductivity of mixture: %.4e (W/m-K)\n", λ)
-
+    
+    return Symbol("Success")
 end
 
 

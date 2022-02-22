@@ -99,9 +99,11 @@ function plug(input_file::AbstractString, lib_dir::AbstractString, sens= false)
     end
     cb = FunctionCallingCallback(write_out_put)    
     sol = solve(prob, CVODE_BDF(linear_solver=:GMRES), reltol=1e-6, abstol=1e-10, save_everystep=false,callback=cb);        
-    println("Solver integration: ",sol.retcode)
+    
     close(s_stream)
     close(g_stream)
+
+    return sol.retcode
 end
 
 """
