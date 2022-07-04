@@ -1,6 +1,6 @@
 module IdealGas
 include("Constants.jl")
-include("Utils.jl")
+# include("Utils.jl")
 using LightXML
 
 abstract type ComponentDefinition end
@@ -10,16 +10,16 @@ struct Gasphase <: ComponentDefinition
     species::Array{String,1}
 end
 
-struct NASAThermo <: ThermoData
+struct NASAThermo{T1 <: Float64, T2 <: Integer} <: ThermoData
     name::String
     phase::String
-    composition::Dict{String,Int64}
-    molWt::Float64
-    ltl::Float64
-    htl::Float64
-    cmt::Float64
-    ltp::Array{Float64,1}
-    htp::Array{Float64,1}
+    composition::Dict{String,T2}
+    molWt::T1
+    ltl::T1
+    htl::T1
+    cmt::T1
+    ltp::Array{T1,1}
+    htp::Array{T1,1}
 end
 
 #This array will be order as per ig.species
@@ -217,6 +217,7 @@ cp(sp::String,T::Float64,thermoObj::SpeciesThermoObj,species_list::Array{String,
 
 
 """
+H(thermo::NASAThermo, T::Float64)
 Calculates the enthalpy of pure species J/mol
 #   Usage-1:
     H(thermo,T)
@@ -237,6 +238,7 @@ H(sp::String,T::Float64,thermoObj::SpeciesThermoObj,species_list::Array{String,1
 
 
 """
+S(thermo::NASAThermo, T::Float64)
 Calculates the entropy of pure species J/mol-K
 #   Usage-1:
     S(thermo,T)
@@ -296,6 +298,7 @@ function S_all(thermoObj::SpeciesThermoObj,T::Float64)
 end
 
 """
+Hmix(thermoObj::SpeciesThermoObj,T::Float64,mlf::Array{Float64,1})    
 Calculates the enthalpy of a mixture J/mol
 #   Usage
     Hmix(td,T,mlf)
@@ -322,6 +325,7 @@ function cpmix(thermoObj::SpeciesThermoObj,T::Float64,mlf::Array{Float64,1})
 end
 
 """
+Smix(thermoObj::SpeciesThermoObj,T::Float64,p::Float64,mlf::Array{Float64,1})
 Calculates the entropy of a muxture in J/mol-K
 #   Usage
     Smix(thermoObj,T,p,mlf)

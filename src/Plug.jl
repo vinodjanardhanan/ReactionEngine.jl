@@ -1,9 +1,9 @@
 module Plug
 using LightXML, Printf
 using DifferentialEquations, Sundials
-include("Constants.jl")
-include("Utils.jl")
-include("SurfaceReactions.jl")
+using ..SurfaceReactions
+using ..Reactions
+using ..Utils
 
 """
 Plug flow
@@ -88,7 +88,7 @@ function plug(input_file::AbstractString, lib_dir::AbstractString, sens= false)
     n_species = length(gasphase)+length(md.sm.species)
     rate = zeros(n_species)      
     #Create the state object    
-    state = SurfaceReactions.State(mole_fracs,covg,T,p,rate)
+    state = SurfaceReactions.SurfaceRxnState(mole_fracs,covg,T,p,rate)
     #this step is to get the steady state coverage before starting the plug flow integration
     t, state = SurfaceReactions.calculate_ss_molar_production_rates!(state,thermo_obj,md,1.0)
     params = (state,thermo_obj,md, geometry, os_streams)

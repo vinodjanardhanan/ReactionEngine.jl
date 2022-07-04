@@ -1,9 +1,9 @@
 module Cstr
 using LightXML, Printf
 using DifferentialEquations, Sundials
-include("Utils.jl")
-include("Constants.jl")
-include("SurfaceReactions.jl")
+
+using ..Utils
+using ..SurfaceReactions
 
 struct ConstParams{T1}
     ρ_in # inlet density
@@ -83,7 +83,7 @@ function cstr(input_file::AbstractString, lib_dir::AbstractString, sens= false)
     create_header(s_stream,"t","T",md.sm.species)
 
     #create state object 
-    state = SurfaceReactions.State(mole_fracs,covg,T,p,rates)
+    state = SurfaceReactions.SurfaceRxnState(mole_fracs,covg,T,p,rates)
     #inlet conditions    
     t_span = (0,it)    
     #the following is the first term in the right hand side of gasphase species residual

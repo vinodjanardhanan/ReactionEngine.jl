@@ -1,5 +1,13 @@
+
+module Utils
+
 include("Constants.jl")
 using LightXML, Printf
+
+export convert2si, get_index, parse_composition
+export massfrac_to_molefrac!, massfrac_to_molefrac, molefrac_to_massfrac!, average_molwt, density
+export get_collection_from_xml, get_value_from_xml, get_text_from_xml, get_molefraction_from_xml
+export create_header, write_to_file
 
 cf = Dict("M"=>1,"CM"=>0.01,"KJ/MOL"=>1000)
 convert2si(u::String) = cf[strip(uppercase(u))]
@@ -187,3 +195,6 @@ function write_to_file(file_stream, args...)
     end
     @printf(file_stream,"\n")
 end
+
+
+end # end of module

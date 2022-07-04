@@ -2,9 +2,11 @@ module Transport
 using LinearAlgebra, StaticArrays
 using LightXML, Printf
 
-include("Utils.jl")
+using ..Utils
+using ..IdealGas
+
 include("Constants.jl")
-include("IdealGas.jl")
+
 #defne the collision integral Omega11
 omega11 = @SMatrix[
     4.008e+000 -1.0380e+00  5.9659e+00 -2.9977e+00  4.9812e-01;
@@ -110,6 +112,7 @@ end
 
 
 """
+viscosity(sp_trd::Array{TransportData}, T::Float64, molwt::Array{Float64})
 Function for the calculation of pure species viscosity in Kg/m-s
 #    Usage
      viscosity(sp_trd, T, molwt)
@@ -132,6 +135,7 @@ function viscosity(sp_trd::Array{TransportData}, T::Float64, molwt::Array{Float6
 end
 
 """
+viscosity(sp_trd::Array{TransportData}, T::Float64, molwt::Array{Float64}, mole_fracs::Array{Float64})
 Calculation of mixture viscosity in Kg/m-s
 #   Usage
     viscosity(sp_trd, T, molwt, mole_fracs)
@@ -160,6 +164,7 @@ function viscosity(sp_trd::Array{TransportData}, T::Float64, molwt::Array{Float6
 end
 
 """
+D_km!(Dkm::Array{Float64}, sp_trd::Array{TransportData}, T::Float64, p::Float64, molwt::Array{Float64}, molefracs::Array{Float64})
 Function for the calculation of mixture diffusion coefficients
 """
 function D_km!(Dkm::Array{Float64}, sp_trd::Array{TransportData}, T::Float64, p::Float64, molwt::Array{Float64}, molefracs::Array{Float64})
@@ -180,7 +185,13 @@ function D_km!(Dkm::Array{Float64}, sp_trd::Array{TransportData}, T::Float64, p:
 end
 
 """
-Thermal conductivity of the mixture 
+thermal_coductivity(sp_trd::Array{TransportData}, T::Float64, p::Float64, thermo_obj::IdealGas.SpeciesThermoObj,molefracs::Array{Float64})
+Calculates the thermal conductivity of the mixture 
+sp_trd : Species transport data
+T : Temperature in K 
+p : Pressure in Pa 
+thermo_ob : SpeciesThermoObj 
+molefracs : Species mole fractions 
 """
 function thermal_coductivity(sp_trd::Array{TransportData}, T::Float64, p::Float64, thermo_obj::IdealGas.SpeciesThermoObj,molefracs::Array{Float64})
     molwt = thermo_obj.molwt    
@@ -230,7 +241,12 @@ function thermal_coductivity(sp_trd::Array{TransportData}, T::Float64, p::Float6
 end
 
 """
+D_ij(sp_trd::Array{TransportData}, T::Float64, p::Float64, molwt::Array{Float64})
 Function for the calculation of binary diffusion coefficients
+    sp_trd : Species transport data 
+    T : Temperature K 
+    p : Pressure Pa 
+    molwt : Species molecular weight 
 """
 function D_ij(sp_trd::Array{TransportData}, T::Float64, p::Float64, molwt::Array{Float64})
     n = length(molwt)
@@ -290,6 +306,7 @@ function D_ij(sp_trd::Array{TransportData}, T::Float64, p::Float64, molwt::Array
 end
 
 """
+D_ii!(D::Array{Float64},sp_trd::Array{TransportData}, T::Float64, p::Float64, molwt::Array{Float64})
 Calculate self diffusion coefficients
 """
 function D_ii!(D::Array{Float64},sp_trd::Array{TransportData}, T::Float64, p::Float64, molwt::Array{Float64})
@@ -374,7 +391,7 @@ end
 function polyfit(rd::Float64,tc::Int64;kwargs...)    
     oxx = Array{Float64,1}()
     n_column = size(omega22,2)
-    rdvec = [ rd^i for i in range(start=n_column-1,step=-1,stop=0)]        
+    rdvec = [ rd^i for i in range(n_column-1,step=-1,stop=0)]        
     reverse!(rdvec)
     
     if kwargs[Symbol("key")]=="Omega22"                        

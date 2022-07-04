@@ -1,8 +1,11 @@
 module ThermoProbe
-include("IdealGas.jl")
-include("Utils.jl")
+# include("IdealGas.jl")
+# include("Utils.jl")
 using LightXML
 using Printf
+
+using ..Utils
+using ..IdealGas
 
 """
 This function read the input file specidfied  

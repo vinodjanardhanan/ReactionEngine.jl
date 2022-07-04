@@ -1,10 +1,14 @@
 module SurfaceReactions
 using LightXML
 using DifferentialEquations
+using ..IdealGas
+using ..Reactions
+using ..Utils
 include("Constants.jl")
-include("Reactions.jl")
-include("Utils.jl")
-include("IdealGas.jl")
+
+export compile_mech
+export calculate_molar_production_rates!, calculate_ss_molar_production_rates!, covg_integration!
+export update_params!, update_params
 
 """
 Function to create composite type of SurfaceMechanism and
@@ -19,7 +23,7 @@ and species_rxn_map function
 function compile_mech(file_path::T, thermo_obj::IdealGas.SpeciesThermoObj, gas_species::Array{T,1}) where T <: AbstractString
     sm = create_mech(file_path,gas_species,thermo_obj.molwt)
     rxn_map = species_rxn_map(gas_species,sm)
-    return MechanismDefinition(sm,rxn_map)
+    return SurfaceMechDefinition(sm,rxn_map)
 end
 
 """
@@ -123,7 +127,7 @@ function create_mech(file_path::String, gas_species::Array{String,1},molwt::Arra
     end
     
     #Define the reaction array to be returned
-    rxn_array= Array{ElementaryReactions,1}()
+    rxn_array= Array{SurfaceRxns,1}()
 
     rct_ids = Array{Int64,1}()
     prdt_ids = Array{Int64,1}()
@@ -156,10 +160,10 @@ function create_mech(file_path::String, gas_species::Array{String,1},molwt::Arra
             if mwc
                 k /= (1-0.5*s)
             end
-            p = Parameters(s,k,β,E)
+            p = SurfaceRxnParameters(s,k,β,E)
 
-            stoic = Stoichiometry(reversible,rct_ids,prdt_ids,cov,ord)
-            elm_rxn = ElementaryReactions(rxn_id,stick,p,mwc,stoic)
+            stoic = SurfaceRxnStoichiometry(reversible,rct_ids,prdt_ids,cov,ord)
+            elm_rxn = SurfaceRxns(rxn_id,Reactions.stick,p,mwc,stoic)
             push!(rxn_array,elm_rxn)
             
         end
@@ -176,11 +180,11 @@ function create_mech(file_path::String, gas_species::Array{String,1},molwt::Arra
             rct_ids = [get_index(sp,all_species) for sp in r_species]
             prdt_ids = [get_index(sp,all_species) for sp in p_species]
             k,β,E = parse_rxn_params(String(params))
-            p = Parameters(0.0,k,β,E)
+            p = SurfaceRxnParameters(0.0,k,β,E)
             #Check for coverage, order and mwc dependency. MWC not applicable to Arrhenius type
             cov,ord,mwc = get_dependencies(cov_dep_rxns,order_dep_rxns,mwc_rxns,rxn_id)   
-            stoic = Stoichiometry(reversible,rct_ids,prdt_ids,cov,ord)
-            elm_rxn = ElementaryReactions(rxn_id,arrhenius,p,mwc,stoic)  
+            stoic = SurfaceRxnStoichiometry(reversible,rct_ids,prdt_ids,cov,ord)
+            elm_rxn = SurfaceRxns(rxn_id,Reactions.arrhenius,p,mwc,stoic)  
             push!(rxn_array,elm_rxn)       
         end
     end
@@ -233,6 +237,8 @@ end
 
 
 """
+calculate_molar_production_rates!(state::ReactionState, thermo_obj::IdealGas.SpeciesThermoObj,md::SurfaceMechDefinition)
+
 Function to calculate the molar production rate of gas-phase and 
 surface species based on the surface reaction mechanism. The function
 will alter the field s_rate after the calculation.
@@ -279,7 +285,7 @@ function calculate_molar_production_rates!(state::ReactionState, thermo_obj::Ide
         #calculate the forward reaction rate                
         E = (rxn.params.E + cov_act_E)*md.sm.energy_factor        
         k = rxn.params.k0 * state.T^rxn.params.β * exp(-E/R/state.T)
-        if rxn.type == stick
+        if rxn.type == Reactions.stick
             k *= sqrt(state.T)
         end        
         push!(rxn_rate,k*prdt_conc*m_order*1e4)#e4 is to convert the units to mol/m2
@@ -296,6 +302,8 @@ function calculate_molar_production_rates!(state::ReactionState, thermo_obj::Ide
 end
 
 """
+calculate_ss_molar_production_rates!(state::ReactionState, thermo_obj::IdealGas.SpeciesThermoObj,md::SurfaceMechDefinition, time =1.0)
+
 Function to calculate the molar production rate of gas-phase species.
 This function integrates the rate equations so that \frac{d\theta}{dt}=0
 #   Usage:
@@ -337,7 +345,7 @@ sensitivity analysis
 function update_params(rate_params::Array{Float64,1},md::SurfaceMechDefinition)
     #assign the new parameters to SurfaceMechDefinition object 
     for i in eachindex(rate_params)
-        if Int(md.sm.reactions[i].type) == Int(stick)
+        if md.sm.reactions[i].type == Reactions.stick
             k = md.sm.reactions[i].params.k0 #This is the current value of converted rate constant including MWC
             if md.sm.reactions[i].mwc == true
                 #take out the MWC factor
@@ -370,7 +378,7 @@ A function for use in global sensitivity analysis. The function updates the para
 """
 function update_params!(md, rate_params::Array{Float64,1},rxn_ids::Array{Int64,1}, constraint_ids::Array{Int64,1}, pratio::Array{Float64,1})
     for id in eachindex(rxn_ids)
-        if Int(md.sm.reactions[rxn_ids[id]].type) == Int(stick)
+        if md.sm.reactions[rxn_ids[id]].type == Reactions.stick
             # The current value of sticking coefficient converted to rate constant including MWC
             k = md.sm.reactions[rxn_ids[id]].params.k0                       
             if md.sm.reactions[rxn_ids[id]].mwc == true

@@ -10,7 +10,7 @@ where $\theta_k$ is the surface coverage of species  $k$, $t$ is the time, $\dot
 
 The code is invoked by using the following method.
 ```@docs
-inspect(input_file::AbstractString, lib_dir::AbstractString)
+inspect(input_file::AbstractString, lib_dir::AbstractString) 
 ```
 On the Julia REPL 
 ```julia

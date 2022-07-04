@@ -2,13 +2,15 @@ module Sens
 using LightXML, Printf
 using DifferentialEquations, Statistics, GlobalSensitivity
 using QuasiMonteCarlo
-include("Constants.jl")
-include("Utils.jl")
-include("Batch.jl")
-include("Plug.jl")
-include("Cstr.jl")
-include("Reactions.jl")
-include("SurfaceReactions.jl")
+
+using ..Reactions
+using ..SurfaceReactions
+using ..Utils
+using ..Cstr
+using ..Batch
+using ..Plug
+
+
 struct  gsa_parameters 
     monitor::Array{String,1}   
     lower_pc::Float64
@@ -214,7 +216,7 @@ This function returns the sticking coefficient or the pre-exponent factor
 function gsa_smech_parameter_map!(gsa_smech_params::Array{Float64,1}, gsa_srxn_ids::Array{Int64,1}, gsa_srxn_constraint_ids::Array{Int64,1}, md )    
     
     function populate(rxn)
-        if Int(rxn.type) == Int(stick)
+        if rxn.type == Reactions.stick
             push!(gsa_smech_params,rxn.params.s)
         else
             push!(gsa_smech_params,rxn.params.k0)
@@ -253,7 +255,7 @@ A function to calculate the intial ratio of pre-exponential factors
 function initial_parameter_ratio!(p_ratio::Array{Float64,1},rxn_ids::Array{Int64,1},constraints_ids::Array{Int64,1}, md)
     for i in eachindex(rxn_ids)        
         if constraints_ids[i] != 0
-            if Int(md.sm.reactions[rxn_ids[i]].type) == Int(stick)
+            if md.sm.reactions[rxn_ids[i]].type == Reactions.stick
                 ratio = md.sm.reactions[rxn_ids[i]].params.k0/md.sm.reactions[constraints_ids[i]].params.k0
                 push!(p_ratio,ratio)
             else                

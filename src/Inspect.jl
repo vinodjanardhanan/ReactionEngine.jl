@@ -1,11 +1,10 @@
 module Inspect
-include("Utils.jl")
-include("Constants.jl")
-include("SurfaceReactions.jl")
+
 using LightXML
 using Printf
 
-
+using ..SurfaceReactions
+using ..Utils
 """
 This function is to test a surface reaction mechanism.
 Ideally the sum of fluxes must vanish at steasy state. 
@@ -47,7 +46,7 @@ function  run(input_file::AbstractString, lib_dir::AbstractString)
     n_species = length(gasphase)+length(md.sm.species)
     rate = zeros(n_species)    
     #Create the state object    
-    state = SurfaceReactions.State(mole_fracs,covg,T,p,rate)
+    state = SurfaceReactions.SurfaceRxnState(mole_fracs,covg,T,p,rate)
 
     #calculate the molar production rates    
     t, state = SurfaceReactions.calculate_ss_molar_production_rates!(state,thermo_obj,md,10.0)

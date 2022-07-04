@@ -1,12 +1,12 @@
 module Batch
 using LightXML, Printf
 using DifferentialEquations
+
+using ..Utils
+using ..SurfaceReactions
+
 include("Constants.jl")
-include("Utils.jl")
-include("SurfaceReactions.jl")
-include("Reactions.jl")
-include("IdealGas.jl")
-    
+
 struct ConstantParams{T1}
     Asv::T1
     T::T1
@@ -37,6 +37,8 @@ This is the calling function for executing the batch reactor
 -   lib_dir: the direcrtory in which the data files are present. It must be the relative path
 """
 function batch(input_file::AbstractString, lib_dir::AbstractString, sens=false)
+
+    
     
     xmldoc = parse_file(input_file)
     xmlroot = root(xmldoc)
@@ -56,7 +58,7 @@ function batch(input_file::AbstractString, lib_dir::AbstractString, sens=false)
 
     #define the Parameters
     cp = ConstantParams(id.Asv,id.T)    
-    state = SurfaceReactions.State(id.mole_fracs,id.md.sm.si.ini_covg,id.T,id.p_initial,rates)
+    state = SurfaceReactions.SurfaceRxnState(id.mole_fracs,id.md.sm.si.ini_covg,id.T,id.p_initial,rates)
     t_span = (0,id.tf)
     params = (state, id.thermo_obj, id.md, cp, o_stream)
     prob = ODEProblem(residual!,soln,t_span,params)

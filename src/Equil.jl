@@ -1,8 +1,10 @@
 module Equil
 using LightXML, Printf
 using LinearAlgebra, Roots, RowEchelon
-include("IdealGas.jl")
-include("Utils.jl")
+using ..Utils
+using ..IdealGas
+include("Constants.jl")
+
 
 function equil(input_file::AbstractString, lib_dir::AbstractString)
     #lib directory    
@@ -202,15 +204,24 @@ function minimize_G!(moles::Array{Float64},stc::Matrix, thermo_obj, Kp::Array{Fl
     Gmin = true 
     while Gmin
         mole_fracs = moles/sum(moles)                  
-        G0 = IdealGas.Gmix(thermo_obj,T,p,mole_fracs)   
-        for i in 1:nr
-            equilibrate_reaction!(moles,stc[i,:],Kp[i],p)  
+        G0 = IdealGas.Gmix(thermo_obj,T,p,mole_fracs)           
+        for i in 1:nr            
+            stc_rcts = findall(<(0),stc[i,:])            
+            chek_rxn = true
+            for k in stc_rcts
+                if moles[k] == 0.0
+                    chek_rxn = false
+                end
+            end
+            if chek_rxn
+                equilibrate_reaction!(moles,stc[i,:],Kp[i],p)  
+            end
             #check if the Gibbs energy has decreased             
         end
         mole_fracs = moles/sum(moles)                  
         G = IdealGas.Gmix(thermo_obj,T,p,mole_fracs) 
         # println(G, "\t", G0, "\t", G-G0)     
-        Gmin = G-G0 < 1e-15 ? false : true
+        Gmin = abs(G-G0) < 1e-15 ? false : true
     end
     # mole_fracs = moles/sum(moles)                  
     # println(mole_fracs)
@@ -220,8 +231,9 @@ end
     
 function equilibrate_reaction!(moles::Array{Float64}, rxn_stc::Array{Float64}, Kp::Float64, p::Float64 )
     # println("Equilibrating rxn: ", rxn )
-    dn_min = -1e10
-    dn_max = 1e10    
+    dn_min = -1e15
+    dn_max = 1e15   
+    
     #The maximum possible extent of a reaction depends on the limiting concentration that is present 
     for i in eachindex(rxn_stc)        
         if rxn_stc[i] < 0

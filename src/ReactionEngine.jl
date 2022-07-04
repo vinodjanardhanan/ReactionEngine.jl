@@ -1,5 +1,11 @@
 module ReactionEngine
 # Write your package code here.
+include("Constants.jl")
+include("Utils.jl")
+include("IdealGas.jl")
+include("Reactions.jl")
+include("SurfaceReactions.jl")
+
 include("Inspect.jl")
 include("ThermoProbe.jl")
 include("Plug.jl")
@@ -8,6 +14,7 @@ include("Batch.jl")
 include("Equil.jl")
 include("Transport.jl")
 include("Sens.jl")
+
 export inspect, thermoprobe, cstr, plug, batch, equilibrate, transport_properties, global_sensitivity
 
 """
